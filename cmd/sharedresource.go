@@ -7,5 +7,11 @@ import (
 
 func main() {
 	serverCh := make(chan string)
-	network.Serve(serverCh, src.SharedResourcePort)
+	go network.Serve(serverCh, src.SharedResourcePort)
+	for {
+		_, valid := <-serverCh
+		if !valid {
+			continue
+		}
+	}
 }
