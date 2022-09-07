@@ -59,24 +59,29 @@ func Execute() {
 			if !valid {
 				break
 			}
-			id, err := strconv.Atoi(command)
-			if err != nil {
+			switch command {
+			case strconv.Itoa(myID):
+				logicalClock.InternalEvent()
+			case ConsumeCmd:
+				logicalClock.InternalEvent()
+				for id := 0; id < len(ports); id++ {
+					if id+1 == myID {
+						continue
+					}
+					network.UdpSend(connections[id+1], buildRequestMessage(logicalClock))
+				}
+			default:
 				fmt.Println("invalid command, ignoring...")
-				break
-			}
-			if id < 1 || id > len(ports) {
-				fmt.Println("given id does not exist in context, ignoring...")
-				break
-			}
-			logicalClock.InternalEvent()
-			if id != myID {
-				network.UdpSend(connections[id], logicalClock.GetClockStr())
 			}
 		case msg, valid := <-serverCh:
 			if !valid {
 				break
 			}
-			logicalClock.ExternalEvent(msg)
+			parsedMsg, err := parseMessage(msg)
+			if err != nil {
+				fmt.Println("invalid message, ignoring...")
+			}
+			logicalClock.ExternalEvent(parsedMsg.ClockStr)
 		default:
 		}
 		time.Sleep(time.Second * 1)
