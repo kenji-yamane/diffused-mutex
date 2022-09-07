@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-func readInput(ch chan string) {
+func ReadInput(ch chan string) {
 	reader := bufio.NewReader(os.Stdin)
 	for {
 		text, _, _ := reader.ReadLine()
