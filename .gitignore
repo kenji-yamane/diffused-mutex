@@ -12,7 +12,10 @@
 *.out
 
 # Binaries
-binaries/*
+bin/*
+
+# Intellij metadata
+.idea
 
 # Dependency directories (remove the comment below to include it)
 vendor/
