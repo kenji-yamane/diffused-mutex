@@ -44,6 +44,12 @@ func main() {
 	connections := initConnections(myId, ports)
 	defer closeConnections(connections)
 
+	csConn := network.UdpConnect(src.SharedResourcePort)
+	defer func() {
+		err = csConn.Close()
+		customerror.CheckError(err)
+	}()
+
 	terminalCh := make(chan string)
 	go src.ReadInput(terminalCh)
 
@@ -52,7 +58,9 @@ func main() {
 
 	var logicalClock clock.LogicalClock
 	logicalClock = clock.NewScalarClock(myId)
+	replyManager := src.NewReplyManager(len(ports))
 	state := src.Released
+	var requestTimestamp string
 	for {
 		select {
 		case command, valid := <-terminalCh:
@@ -63,17 +71,22 @@ func main() {
 			case strconv.Itoa(myId):
 				logicalClock.InternalEvent()
 			case src.ConsumeCmd:
-				if state != src.Released {
-					fmt.Println("x ignored")
-					break
-				}
-				state = src.Wanted
-				logicalClock.InternalEvent()
-				for id := 0; id < len(ports); id++ {
-					if id+1 == myId {
-						continue
+				fmt.Println(state)
+				switch state {
+				case src.Released:
+					state = src.Wanted
+					logicalClock.InternalEvent()
+					requestTimestamp = logicalClock.GetClockStr()
+					for id := 0; id < len(ports); id++ {
+						if id+1 == myId {
+							continue
+						}
+						network.UdpSend(connections[id+1], src.BuildRequestMessage(myId, logicalClock))
 					}
-					network.UdpSend(connections[id+1], src.BuildRequestMessage(myId, logicalClock))
+				case src.Wanted:
+					fmt.Println("x ignored")
+				case src.Held:
+					fmt.Println("x ignored")
 				}
 			default:
 				fmt.Println("invalid command, ignoring...")
@@ -90,8 +103,38 @@ func main() {
 
 			switch src.MessageType(parsedMsg.Text) {
 			case src.Request:
-				network.UdpSend(connections[parsedMsg.SenderId], src.BuildReplyMessage(myId, logicalClock))
+				switch state {
+				case src.Released:
+					network.UdpSend(connections[parsedMsg.SenderId], src.BuildReplyMessage(myId, logicalClock))
+				case src.Wanted:
+					selectedId, err := logicalClock.CompareClocks(requestTimestamp, parsedMsg.ClockStr, parsedMsg.SenderId)
+					if err != nil {
+						fmt.Println("invalid message, ignoring...")
+						break
+					}
+					if selectedId == myId {
+						replyManager.EnqueueProcess(parsedMsg.SenderId)
+					} else {
+						network.UdpSend(connections[parsedMsg.SenderId], src.BuildReplyMessage(myId, logicalClock))
+					}
+				case src.Held:
+					replyManager.EnqueueProcess(parsedMsg.SenderId)
+				}
 			case src.Reply:
+				if !replyManager.ReceiveReply() {
+					break
+				}
+				state = src.Held
+				network.UdpSend(csConn, src.BuildConsumeMessage(myId, logicalClock))
+				fmt.Println("entered cs")
+				time.Sleep(5 * time.Second)
+				state = src.Released
+				fmt.Println("left cs")
+				processesToReply := replyManager.Dequeue()
+				for _, id := range processesToReply {
+					network.UdpSend(connections[id], src.BuildReplyMessage(myId, logicalClock))
+				}
+				replyManager.Reset()
 			default:
 			}
 		default:

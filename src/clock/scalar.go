@@ -61,3 +61,20 @@ func (c *ScalarClock) parse(jsonClock string) (scalarClockSerializer, error) {
 	err := json.Unmarshal([]byte(jsonClock), &otherClock)
 	return otherClock, err
 }
+
+func (c *ScalarClock) CompareClocks(requestClockStr string, externalClockStr string, externalId int) (int, error) {
+	requestClock, err := c.parse(requestClockStr)
+	if err != nil {
+		return 0, err
+	}
+	externalClock, err := c.parse(externalClockStr)
+	if err != nil {
+		return 0, err
+	}
+	if requestClock.Ticks < externalClock.Ticks {
+		return c.id, nil
+	} else if requestClock.Ticks > externalClock.Ticks {
+		return externalId, nil
+	}
+	return math.Min(c.id, externalId), nil
+}

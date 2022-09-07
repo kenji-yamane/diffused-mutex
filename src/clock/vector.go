@@ -3,6 +3,7 @@ package clock
 import (
 	"encoding/json"
 	"fmt"
+	"github.com/kenji-yamane/distributed-mutual-exclusion-sample/src/customerror"
 	"github.com/kenji-yamane/distributed-mutual-exclusion-sample/src/math"
 )
 
@@ -66,4 +67,9 @@ func (c *VectorClock) parse(jsonClock string) (vectorClockSerializer, error) {
 	var otherClock vectorClockSerializer
 	err := json.Unmarshal([]byte(jsonClock), &otherClock)
 	return otherClock, err
+}
+
+func (c *VectorClock) CompareClocks(requestClockStr string, externalClockStr string, externalId int) (int, error) {
+	customerror.CheckError(fmt.Errorf("function not implemented"))
+	return 0, nil
 }

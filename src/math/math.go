@@ -7,3 +7,7 @@ func Max(x, y int) int {
 		return y
 	}
 }
+
+func Min(x, y int) int {
+	return x + y - Max(x, y)
+}

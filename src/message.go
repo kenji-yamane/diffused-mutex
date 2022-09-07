@@ -13,6 +13,10 @@ type MessageSerializer struct {
 	ClockStr string `json:"clock_str"`
 }
 
+func BuildConsumeMessage(myId int, c clock.LogicalClock) string {
+	return buildMessage(myId, c, Consume)
+}
+
 func BuildReplyMessage(myId int, c clock.LogicalClock) string {
 	return buildMessage(myId, c, Reply)
 }
