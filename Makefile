@@ -1,10 +1,12 @@
 .PHONY: build p1 p2 p3
 
-BIN=./bin
-PROCESS=process
+CMD:=./cmd
+BIN:=./bin
+
+PROCESS:=process
 
 build:
-	go build -o $(BIN)/$(PROCESS) main.go
+	go build -o $(BIN)/$(PROCESS) $(CMD)/$(PROCESS).go
 
 THREE_SIMULATOR=10004 10003 10002
 
