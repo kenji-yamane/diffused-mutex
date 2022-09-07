@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/kenji-yamane/College/professional/fourth-semester/ces-27/logical-clock/src/math"
+	"github.com/kenji-yamane/distributed-mutual-exclusion-sample/src/math"
 )
 
 type ScalarClock struct {

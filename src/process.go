@@ -2,9 +2,9 @@ package src
 
 import (
 	"fmt"
-	"github.com/kenji-yamane/College/professional/fourth-semester/ces-27/logical-clock/src/clock"
-	"github.com/kenji-yamane/College/professional/fourth-semester/ces-27/logical-clock/src/customerror"
-	"github.com/kenji-yamane/College/professional/fourth-semester/ces-27/logical-clock/src/network"
+	"github.com/kenji-yamane/distributed-mutual-exclusion-sample/src/clock"
+	"github.com/kenji-yamane/distributed-mutual-exclusion-sample/src/customerror"
+	"github.com/kenji-yamane/distributed-mutual-exclusion-sample/src/network"
 	"net"
 	"os"
 	"strconv"

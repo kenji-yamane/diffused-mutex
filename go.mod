@@ -1,3 +1,3 @@
-module github.com/kenji-yamane/College/professional/fourth-semester/ces-27/logical-clock
+module github.com/kenji-yamane/distributed-mutual-exclusion-sample
 
 go 1.17
