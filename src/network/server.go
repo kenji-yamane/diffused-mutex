@@ -7,7 +7,7 @@ import (
 )
 
 func Serve(ch chan string, port string) {
-	/* Lets prepare a address at any address at port :port*/
+	/* Let's prepare a address at any address at port :port*/
 	ServerAddr, err := net.ResolveUDPAddr("udp", ":"+port)
 	customerror.CheckError(err)
 
