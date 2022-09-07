@@ -1,12 +1,18 @@
-.PHONY: build p1 p2 p3
+.PHONY: build build-cs build-all p1 p2 p3
 
 CMD:=./cmd
 BIN:=./bin
 
 PROCESS:=process
+SHARED_RESOURCE:=sharedresource
 
 build:
 	go build -o $(BIN)/$(PROCESS) $(CMD)/$(PROCESS).go
+
+build-cs:
+	go build -o $(BIN)/$(SHARED_RESOURCE) $(CMD)/$(SHARED_RESOURCE).go
+
+build-all: build build-cs
 
 THREE_SIMULATOR=10004 10003 10002
 
@@ -18,3 +24,6 @@ p2:
 
 p3:
 	$(BIN)/$(PROCESS) 3 $(THREE_SIMULATOR)
+
+cs:
+	$(BIN)/$(SHARED_RESOURCE)

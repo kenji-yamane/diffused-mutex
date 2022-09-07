@@ -14,6 +14,8 @@ const (
 	Held     State = "held"
 
 	ConsumeCmd = "x"
+
+	SharedResourcePort = "10001"
 )
 
 func (m MessageType) String() string {
