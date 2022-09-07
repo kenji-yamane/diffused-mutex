@@ -24,7 +24,7 @@ func (c *VectorClock) InternalEvent() {
 }
 
 func (c *VectorClock) ExternalEvent(externalClockStr string) {
-	externalClock, err := parse(externalClockStr)
+	externalClock, err := c.parse(externalClockStr)
 	if err != nil {
 		fmt.Println("invalid clock string, ignoring...")
 		return
@@ -64,7 +64,7 @@ func (c *VectorClock) serialize() (string, error) {
 	return string(jsonClock), err
 }
 
-func parse(jsonClock string) (vectorClockSerializer, error) {
+func (c *VectorClock) parse(jsonClock string) (vectorClockSerializer, error) {
 	var otherClock vectorClockSerializer
 	err := json.Unmarshal([]byte(jsonClock), &otherClock)
 	return otherClock, err

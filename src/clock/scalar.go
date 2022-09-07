@@ -1,18 +1,19 @@
 package clock
 
 import (
+	"encoding/json"
 	"fmt"
-	"strconv"
-
 	"github.com/kenji-yamane/distributed-mutual-exclusion-sample/src/math"
 )
 
 type ScalarClock struct {
+	id    int
 	ticks int
 }
 
-func NewScalarClock() LogicalClock {
+func NewScalarClock(id int) LogicalClock {
 	return &ScalarClock{
+		id:    id,
 		ticks: 0,
 	}
 }
@@ -23,19 +24,42 @@ func (c *ScalarClock) InternalEvent() {
 }
 
 func (c *ScalarClock) ExternalEvent(externalClockStr string) {
-	externalTicks, err := strconv.Atoi(externalClockStr)
+	externalClock, err := c.parse(externalClockStr)
 	if err != nil {
 		fmt.Println("invalid clock string, ignoring...")
 		return
 	}
-	c.ticks = math.Max(externalTicks, c.ticks) + 1
+	c.ticks = math.Max(externalClock.Ticks, c.ticks) + 1
 	c.echoClock()
 }
 
+type scalarClockSerializer struct {
+	Id    int `json:"id"`
+	Ticks int `json:"ticks"`
+}
+
+func (c *ScalarClock) serialize() (string, error) {
+	jsonClock, err := json.Marshal(scalarClockSerializer{
+		Id:    c.id,
+		Ticks: c.ticks,
+	})
+	return string(jsonClock), err
+}
+
 func (c *ScalarClock) GetClockStr() string {
-	return strconv.Itoa(c.ticks)
+	clockStr, err := c.serialize()
+	if err != nil {
+		fmt.Println("customerror serializing clock")
+	}
+	return clockStr
 }
 
 func (c *ScalarClock) echoClock() {
 	fmt.Println("logical clock: ", c.ticks)
+}
+
+func (c *ScalarClock) parse(jsonClock string) (scalarClockSerializer, error) {
+	var otherClock scalarClockSerializer
+	err := json.Unmarshal([]byte(jsonClock), &otherClock)
+	return otherClock, err
 }

@@ -52,7 +52,7 @@ func Execute() {
 	go network.Serve(serverCh, ports[myID-1])
 
 	var logicalClock clock.LogicalClock
-	logicalClock = clock.NewVectorClock(myID, len(ports))
+	logicalClock = clock.NewScalarClock(myID)
 	for {
 		select {
 		case command, valid := <-terminalCh:
@@ -82,4 +82,3 @@ func Execute() {
 		time.Sleep(time.Second * 1)
 	}
 }
-
