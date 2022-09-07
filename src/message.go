@@ -8,20 +8,22 @@ import (
 )
 
 type messageSerializer struct {
+	SenderId int    `json:"id"`
 	Text     string `json:"text"`
 	ClockStr string `json:"clock_str"`
 }
 
-func buildReplyMessage(c clock.LogicalClock) string {
-	return buildMessage(c, Reply)
+func buildReplyMessage(myId int, c clock.LogicalClock) string {
+	return buildMessage(myId, c, Reply)
 }
 
-func buildRequestMessage(c clock.LogicalClock) string {
-	return buildMessage(c, Request)
+func buildRequestMessage(myId int, c clock.LogicalClock) string {
+	return buildMessage(myId, c, Request)
 }
 
-func buildMessage(c clock.LogicalClock, messageType MessageType) string {
+func buildMessage(myId int, c clock.LogicalClock, messageType MessageType) string {
 	m := messageSerializer{
+		SenderId: myId,
 		Text:     messageType.String(),
 		ClockStr: c.GetClockStr(),
 	}

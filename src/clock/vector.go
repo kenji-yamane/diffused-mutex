@@ -47,27 +47,16 @@ func (c *VectorClock) GetClockStr() string {
 	return clockStr
 }
 
-func (c *VectorClock) GetProcessID(externalClockStr string) int {
-	externalClock, err := c.parse(externalClockStr)
-	if err != nil {
-		fmt.Println("invalid clock string, ignoring...")
-		return 0
-	}
-	return externalClock.Id
-}
-
 func (c *VectorClock) echoClock() {
 	fmt.Println("logical clock: ", c.ticks)
 }
 
 type vectorClockSerializer struct {
-	Id    int   `json:"id"`
 	Ticks []int `json:"ticks"`
 }
 
 func (c *VectorClock) serialize() (string, error) {
 	jsonClock, err := json.Marshal(vectorClockSerializer{
-		Id:    c.id,
 		Ticks: c.ticks,
 	})
 	return string(jsonClock), err

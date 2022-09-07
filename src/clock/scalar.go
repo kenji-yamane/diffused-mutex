@@ -34,13 +34,11 @@ func (c *ScalarClock) ExternalEvent(externalClockStr string) {
 }
 
 type scalarClockSerializer struct {
-	Id    int `json:"id"`
 	Ticks int `json:"ticks"`
 }
 
 func (c *ScalarClock) serialize() (string, error) {
 	jsonClock, err := json.Marshal(scalarClockSerializer{
-		Id:    c.id,
 		Ticks: c.ticks,
 	})
 	return string(jsonClock), err
@@ -52,15 +50,6 @@ func (c *ScalarClock) GetClockStr() string {
 		fmt.Println("customerror serializing clock")
 	}
 	return clockStr
-}
-
-func (c *ScalarClock) GetProcessID(externalClockStr string) int {
-	externalClock, err := c.parse(externalClockStr)
-	if err != nil {
-		fmt.Println("invalid clock string, ignoring...")
-		return 0
-	}
-	return externalClock.Id
 }
 
 func (c *ScalarClock) echoClock() {

@@ -11,10 +11,10 @@ import (
 	"time"
 )
 
-func initConnections(myID int, ports []string) map[int]*net.UDPConn {
+func initConnections(myId int, ports []string) map[int]*net.UDPConn {
 	connections := make(map[int]*net.UDPConn)
 	for idx, port := range ports {
-		if idx+1 == myID {
+		if idx+1 == myId {
 			continue
 		}
 		conn := network.UdpConnect(port)
@@ -36,23 +36,23 @@ func Execute() {
 	if len(os.Args) < 4 {
 		customerror.CheckError(fmt.Errorf("not enough ports given as arguments"))
 	}
-	myID, err := strconv.Atoi(os.Args[1])
+	myId, err := strconv.Atoi(os.Args[1])
 	if err != nil {
 		customerror.CheckError(fmt.Errorf("first argument should be a number representing the sequential process ID"))
 	}
 	ports := os.Args[2:len(os.Args)]
 
-	connections := initConnections(myID, ports)
+	connections := initConnections(myId, ports)
 	defer closeConnections(connections)
 
 	terminalCh := make(chan string)
 	go readInput(terminalCh)
 
 	serverCh := make(chan string)
-	go network.Serve(serverCh, ports[myID-1])
+	go network.Serve(serverCh, ports[myId-1])
 
 	var logicalClock clock.LogicalClock
-	logicalClock = clock.NewScalarClock(myID)
+	logicalClock = clock.NewScalarClock(myId)
 	state := Released
 	for {
 		select {
@@ -61,7 +61,7 @@ func Execute() {
 				break
 			}
 			switch command {
-			case strconv.Itoa(myID):
+			case strconv.Itoa(myId):
 				logicalClock.InternalEvent()
 			case ConsumeCmd:
 				if state != Released {
@@ -71,10 +71,10 @@ func Execute() {
 				state = Wanted
 				logicalClock.InternalEvent()
 				for id := 0; id < len(ports); id++ {
-					if id+1 == myID {
+					if id+1 == myId {
 						continue
 					}
-					network.UdpSend(connections[id+1], buildRequestMessage(logicalClock))
+					network.UdpSend(connections[id+1], buildRequestMessage(myId, logicalClock))
 				}
 			default:
 				fmt.Println("invalid command, ignoring...")
@@ -91,8 +91,7 @@ func Execute() {
 
 			switch MessageType(parsedMsg.Text) {
 			case Request:
-				id := logicalClock.GetProcessID(parsedMsg.ClockStr)
-				network.UdpSend(connections[id], buildReplyMessage(logicalClock))
+				network.UdpSend(connections[parsedMsg.SenderId], buildReplyMessage(myId, logicalClock))
 			case Reply:
 			default:
 			}
