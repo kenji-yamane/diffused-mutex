@@ -4,7 +4,7 @@ BIN=./bin
 PROCESS=process
 
 build:
-	go build -o $(BIN)/$(PROCESS)
+	go build -o $(BIN)/$(PROCESS) main.go
 
 THREE_SIMULATOR=10004 10003 10002
 
