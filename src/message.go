@@ -12,6 +12,10 @@ type messageSerializer struct {
 	ClockStr string `json:"clock_str"`
 }
 
+func buildReplyMessage(c clock.LogicalClock) string {
+	return buildMessage(c, Reply)
+}
+
 func buildRequestMessage(c clock.LogicalClock) string {
 	return buildMessage(c, Request)
 }

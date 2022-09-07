@@ -54,6 +54,15 @@ func (c *ScalarClock) GetClockStr() string {
 	return clockStr
 }
 
+func (c *ScalarClock) GetProcessID(externalClockStr string) int {
+	externalClock, err := c.parse(externalClockStr)
+	if err != nil {
+		fmt.Println("invalid clock string, ignoring...")
+		return 0
+	}
+	return externalClock.Id
+}
+
 func (c *ScalarClock) echoClock() {
 	fmt.Println("logical clock: ", c.ticks)
 }

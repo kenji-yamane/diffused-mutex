@@ -53,6 +53,7 @@ func Execute() {
 
 	var logicalClock clock.LogicalClock
 	logicalClock = clock.NewScalarClock(myID)
+	state := Released
 	for {
 		select {
 		case command, valid := <-terminalCh:
@@ -63,6 +64,11 @@ func Execute() {
 			case strconv.Itoa(myID):
 				logicalClock.InternalEvent()
 			case ConsumeCmd:
+				if state != Released {
+					fmt.Println("x ignored")
+					break
+				}
+				state = Wanted
 				logicalClock.InternalEvent()
 				for id := 0; id < len(ports); id++ {
 					if id+1 == myID {
@@ -82,6 +88,14 @@ func Execute() {
 				fmt.Println("invalid message, ignoring...")
 			}
 			logicalClock.ExternalEvent(parsedMsg.ClockStr)
+
+			switch MessageType(parsedMsg.Text) {
+			case Request:
+				id := logicalClock.GetProcessID(parsedMsg.ClockStr)
+				network.UdpSend(connections[id], buildReplyMessage(logicalClock))
+			case Reply:
+			default:
+			}
 		default:
 		}
 		time.Sleep(time.Second * 1)
