@@ -56,9 +56,9 @@ type vectorClockSerializer struct {
 }
 
 func (c *VectorClock) serialize() (string, error) {
-	jsonClock, err := json.Marshal(vectorClockSerializer{
+	jsonClock, err := json.MarshalIndent(vectorClockSerializer{
 		Ticks: c.ticks,
-	})
+	}, "", "\t")
 	return string(jsonClock), err
 }
 

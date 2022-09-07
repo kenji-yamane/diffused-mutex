@@ -27,7 +27,7 @@ func buildMessage(myId int, c clock.LogicalClock, messageType MessageType) strin
 		Text:     messageType.String(),
 		ClockStr: c.GetClockStr(),
 	}
-	mStr, err := json.Marshal(m)
+	mStr, err := json.MarshalIndent(m, "", "\t")
 	if err != nil {
 		customerror.CheckError(fmt.Errorf("error serializing"))
 	}

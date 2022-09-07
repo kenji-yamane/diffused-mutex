@@ -38,9 +38,9 @@ type scalarClockSerializer struct {
 }
 
 func (c *ScalarClock) serialize() (string, error) {
-	jsonClock, err := json.Marshal(scalarClockSerializer{
+	jsonClock, err := json.MarshalIndent(scalarClockSerializer{
 		Ticks: c.ticks,
-	})
+	}, "", "\t")
 	return string(jsonClock), err
 }
 
