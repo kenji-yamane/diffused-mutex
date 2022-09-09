@@ -5,6 +5,7 @@ import (
 	"github.com/kenji-yamane/distributed-mutual-exclusion-sample/src"
 	"github.com/kenji-yamane/distributed-mutual-exclusion-sample/src/clock"
 	"github.com/kenji-yamane/distributed-mutual-exclusion-sample/src/customerror"
+	"github.com/kenji-yamane/distributed-mutual-exclusion-sample/src/messages"
 	"github.com/kenji-yamane/distributed-mutual-exclusion-sample/src/network"
 	"net"
 	"os"
@@ -81,7 +82,7 @@ func main() {
 						if id+1 == myId {
 							continue
 						}
-						network.UdpSend(connections[id+1], src.BuildRequestMessage(myId, logicalClock))
+						network.UdpSend(connections[id+1], messages.BuildRequestMessage(myId, logicalClock))
 					}
 				case src.Wanted:
 					fmt.Println("x ignored")
@@ -95,17 +96,17 @@ func main() {
 			if !valid {
 				break
 			}
-			parsedMsg, err := src.ParseMessage(msg)
+			parsedMsg, err := messages.ParseMessage(msg)
 			if err != nil {
 				fmt.Println("invalid message, ignoring...")
 			}
 			logicalClock.ExternalEvent(parsedMsg.ClockStr)
 
-			switch src.MessageType(parsedMsg.Text) {
-			case src.Request:
+			switch messages.MessageType(parsedMsg.Text) {
+			case messages.Request:
 				switch state {
 				case src.Released:
-					network.UdpSend(connections[parsedMsg.SenderId], src.BuildReplyMessage(myId, logicalClock))
+					network.UdpSend(connections[parsedMsg.SenderId], messages.BuildReplyMessage(myId, logicalClock))
 				case src.Wanted:
 					selectedId, err := logicalClock.CompareClocks(requestTimestamp, parsedMsg.ClockStr, parsedMsg.SenderId)
 					if err != nil {
@@ -115,26 +116,28 @@ func main() {
 					if selectedId == myId {
 						replyManager.EnqueueProcess(parsedMsg.SenderId)
 					} else {
-						network.UdpSend(connections[parsedMsg.SenderId], src.BuildReplyMessage(myId, logicalClock))
+						network.UdpSend(connections[parsedMsg.SenderId], messages.BuildReplyMessage(myId, logicalClock))
 					}
 				case src.Held:
 					replyManager.EnqueueProcess(parsedMsg.SenderId)
 				}
-			case src.Reply:
+			case messages.Reply:
 				if !replyManager.ReceiveReply() {
 					break
 				}
 				state = src.Held
-				network.UdpSend(csConn, src.BuildConsumeMessage(myId, logicalClock))
+				network.UdpSend(csConn, messages.BuildConsumeMessage(myId, logicalClock))
 				fmt.Println("entered cs")
 				time.Sleep(5 * time.Second)
 				state = src.Released
 				fmt.Println("left cs")
 				processesToReply := replyManager.Dequeue()
 				for _, id := range processesToReply {
-					network.UdpSend(connections[id], src.BuildReplyMessage(myId, logicalClock))
+					network.UdpSend(connections[id], messages.BuildReplyMessage(myId, logicalClock))
 				}
 				replyManager.Reset()
+			case messages.Consume:
+				fmt.Printf("received %s, but I'm not a shared resource, ignoring...\n", messages.Consume)
 			default:
 			}
 		default:
