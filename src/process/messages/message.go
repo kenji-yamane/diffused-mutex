@@ -7,7 +7,7 @@ import (
 	"github.com/kenji-yamane/distributed-mutual-exclusion-sample/src/customerror"
 )
 
-type MessageSerializer struct {
+type Message struct {
 	SenderId int    `json:"id"`
 	Text     string `json:"text"`
 	ClockStr string `json:"clock_str"`
@@ -26,7 +26,7 @@ func BuildRequestMessage(myId int, c clock.LogicalClock) string {
 }
 
 func buildMessage(myId int, c clock.LogicalClock, messageType MessageType) string {
-	m := MessageSerializer{
+	m := Message{
 		SenderId: myId,
 		Text:     messageType.String(),
 		ClockStr: c.GetClockStr(),
@@ -38,8 +38,8 @@ func buildMessage(myId int, c clock.LogicalClock, messageType MessageType) strin
 	return string(mStr)
 }
 
-func ParseMessage(msg string) (MessageSerializer, error) {
-	var msgSerializer MessageSerializer
+func ParseMessage(msg string) (Message, error) {
+	var msgSerializer Message
 	err := json.Unmarshal([]byte(msg), &msgSerializer)
 	return msgSerializer, err
 }

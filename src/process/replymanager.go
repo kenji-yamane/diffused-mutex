@@ -1,4 +1,4 @@
-package src
+package process
 
 type ReplyManager struct {
 	numProcesses int
@@ -27,10 +27,12 @@ func (m *ReplyManager) EnqueueProcess(pid int) {
 }
 
 func (m *ReplyManager) Dequeue() []int {
-	return m.replyQueue
+	queue := m.replyQueue
+	m.reset()
+	return queue
 }
 
-func (m *ReplyManager) Reset() {
+func (m *ReplyManager) reset() {
 	m.numReplies = 0
 	m.replyQueue = make([]int, 0)
 }
